@@ -1,8 +1,12 @@
 import axios from "axios"
 
+console.log("API URL:", import.meta.env.VITE_API_URL);
+
 
 const api = axios.create({
-    baseURL: "http://localhost:3000",
+    // baseURL: "http://localhost:3000",
+    // baseURL: "https://interview-prep-application-backend.onrender.com",
+    baseURL: import.meta.env.VITE_API_URL,
     withCredentials: true
 })
 
