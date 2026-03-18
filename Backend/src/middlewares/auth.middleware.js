@@ -1,43 +1,81 @@
-const jwt = require("jsonwebtoken")
-const tokenBlacklistModel = require("../models/blacklist.model")
+// const jwt = require("jsonwebtoken")
+// const tokenBlacklistModel = require("../models/blacklist.model")
 
 
+
+// async function authUser(req, res, next) {
+
+//     const token = req.cookies.token
+
+//     if (!token) {
+//         return res.status(401).json({
+//             message: "Token not provided."
+//         })
+//     }
+
+//     const isTokenBlacklisted = await tokenBlacklistModel.findOne({
+//         token
+//     })
+
+//     if (isTokenBlacklisted) {
+//         return res.status(401).json({
+//             message: "token is invalid"
+//         })
+//     }
+
+//     try {
+//         const decoded = jwt.verify(token, process.env.JWT_SECRET)
+
+//         req.user = decoded
+
+//         next()
+
+//     } catch (err) {
+
+//         return res.status(401).json({
+//             message: "Invalid token."
+//         })
+//     }
+
+// }
+
+
+// module.exports = { authUser }
+
+
+const jwt = require("jsonwebtoken");
+const tokenBlacklistModel = require("../models/blacklist.model");
 
 async function authUser(req, res, next) {
-
-    const token = req.cookies.token
+  try {
+    const token = req.cookies?.token;
 
     if (!token) {
-        return res.status(401).json({
-            message: "Token not provided."
-        })
+      return res.status(401).json({
+        message: "Token not provided"
+      });
     }
 
-    const isTokenBlacklisted = await tokenBlacklistModel.findOne({
-        token
-    })
+    // check blacklist
+    const isBlacklisted = await tokenBlacklistModel.findOne({ token });
 
-    if (isTokenBlacklisted) {
-        return res.status(401).json({
-            message: "token is invalid"
-        })
+    if (isBlacklisted) {
+      return res.status(401).json({
+        message: "Token is blacklisted"
+      });
     }
 
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    // verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        req.user = decoded
+    req.user = decoded;
+    next();
 
-        next()
-
-    } catch (err) {
-
-        return res.status(401).json({
-            message: "Invalid token."
-        })
-    }
-
+  } catch (err) {
+    return res.status(401).json({
+      message: "Invalid or expired token"
+    });
+  }
 }
 
-
-module.exports = { authUser }
+module.exports = { authUser };
